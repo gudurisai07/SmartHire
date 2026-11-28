@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { api, API_URL } from './api';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { createResumeDocx, printResumePdf } from './resumeExport';
+import { createResumeDocx, parseLatexResume, printResumePdf } from './resumeExport';
 
 async function photoResponse(response) {
   if (response.status === 404) return null;
@@ -1242,6 +1242,7 @@ function LatexResumeEditor({ latexResume, setLatexResume, template }) {
   const [saved, setSaved] = useState(false);
   const [exportingDocx, setExportingDocx] = useState(false);
   const [exportError, setExportError] = useState('');
+  const previewBlocks = useMemo(() => parseLatexResume(latexResume.latex), [latexResume.latex]);
 
   function saveSource() {
     localStorage.setItem('smarthire_latex_resume', JSON.stringify({ template, latex: latexResume.latex, savedAt: new Date().toISOString() }));
@@ -1288,7 +1289,20 @@ function LatexResumeEditor({ latexResume, setLatexResume, template }) {
     {exportError && <p className="latex-export-error" role="alert">{exportError}</p>}
     <div className="latex-workspace">
       <div className="latex-code-pane"><div className="latex-pane-title"><span>resume.tex</span><span>Editing source</span></div><textarea aria-label="Editable LaTeX source" value={latexResume.latex} onChange={e=>setLatexResume({...latexResume,latex:e.target.value})} spellCheck="false" /></div>
-      <div className="latex-preview-pane"><div className="latex-pane-title"><span>PDF &amp; Word export</span><span>Processed in your browser</span></div><div className="latex-preview-message">Save as PDF opens your browser’s print dialog; choose “Save as PDF”. Download DOCX creates an editable Word document. Your resume content is processed locally.</div></div>
+      <div className="latex-preview-pane"><div className="latex-pane-title"><span>Resume preview</span><span>Live preview</span></div>
+        <div className="latex-preview-scroll">
+          {previewBlocks.length ? <article className="resume-paper" aria-label="Generated resume preview">
+            {previewBlocks.map((block, index) => {
+              const key = `${block.type}-${index}`;
+              if (block.type === 'heading') {
+                return block.level === 1 ? <h2 key={key}>{block.text}</h2> : <h3 key={key}>{block.text}</h3>;
+              }
+              if (block.type === 'bullet') return <p className="resume-preview-bullet" key={key}>{block.text}</p>;
+              return index === 0 ? <h1 key={key}>{block.text}</h1> : <p key={key}>{block.text}</p>;
+            })}
+          </article> : <p className="latex-preview-message">Resume preview will appear here when the source contains readable content.</p>}
+        </div>
+      </div>
     </div>
     {latexResume.improvements && <JsonResult data={{ improvements: latexResume.improvements }} />}
   </section>;

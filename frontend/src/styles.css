@@ -698,7 +698,15 @@ a { color: inherit; }
 .latex-preview-pane { background: #6c7684; }
 .latex-preview-pane iframe { width: 100%; flex: 1; min-height: 500px; border: 0; background: #fff; }
 .latex-preview-message { display: grid; flex: 1; place-items: center; padding: 24px; background: #fff; color: #65758b; text-align: center; line-height: 1.5; }
-@media(max-width:900px) { .latex-editor-toolbar { align-items: flex-start; flex-direction: column; } .latex-workspace { grid-template-columns: 1fr; } .latex-code-pane { border-right: 0; border-bottom: 1px solid #dce3ed; } .latex-code-pane textarea,.latex-preview-pane iframe { min-height: 420px; } }
+.latex-preview-scroll { flex: 1; min-height: 0; overflow: auto; padding: 20px; background: #e9edf3; }
+.resume-paper { width: min(100%, 680px); min-height: 100%; box-sizing: border-box; margin: 0 auto; padding: 34px 38px; background: #fff; box-shadow: 0 2px 12px #1720331c; color: #26364b; font: 10px/1.5 Arial, sans-serif; }
+.resume-paper h1 { margin: 0 0 14px; color: #1d2c41; font-size: 20px; text-align: center; }
+.resume-paper h2 { margin: 14px 0 6px; border-bottom: 1px solid #aeb9c8; padding-bottom: 3px; color: #26364b; font-size: 12px; text-transform: uppercase; }
+.resume-paper h3 { margin: 8px 0 4px; color: #26364b; font-size: 11px; }
+.resume-paper p { margin: 3px 0; overflow-wrap: anywhere; }
+.resume-paper .resume-preview-bullet { margin-left: 14px; text-indent: -9px; }
+.latex-preview-scroll > .latex-preview-message { min-height: 100%; }
+@media(max-width:900px) { .latex-editor-toolbar { align-items: flex-start; flex-direction: column; } .latex-workspace { grid-template-columns: 1fr; } .latex-code-pane { border-right: 0; border-bottom: 1px solid #dce3ed; } .latex-code-pane textarea,.latex-preview-pane iframe,.latex-preview-scroll { min-height: 420px; } }
 .resume-file-label { margin: 10px 0; color: #536981; }
 .resume-file-label strong { color: #28415f; overflow-wrap: anywhere; }
 .candidate-profile-heading { display: flex; align-items: center; gap: 14px; margin: 0 0 18px; }
