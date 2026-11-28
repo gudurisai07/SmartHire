@@ -689,6 +689,7 @@ a { color: inherit; }
 .latex-template-tag { margin-left: 8px; padding: 4px 8px; border-radius: 999px; background: #eaf1fc; color: #285ba6; letter-spacing: 0; text-transform: capitalize; }
 .latex-editor-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
 .latex-overleaf-link { text-decoration: none; }
+.latex-export-error { margin: 0 0 12px; color: #a4262c; font-size: .88rem; }
 .latex-workspace { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); min-height: 560px; overflow: hidden; border: 1px solid #29364a; border-radius: 10px; background: #111827; }
 .latex-code-pane,.latex-preview-pane { display: flex; min-width: 0; flex-direction: column; }
 .latex-code-pane { border-right: 1px solid #dce3ed; }

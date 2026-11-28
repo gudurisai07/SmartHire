@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { api, API_URL } from './api';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { createResumeDocx, printResumePdf } from './resumeExport';
 
 async function photoResponse(response) {
   if (response.status === 404) return null;
@@ -1239,27 +1240,55 @@ function ResumeAnalysisDashboard({ data }) {
 
 function LatexResumeEditor({ latexResume, setLatexResume, template }) {
   const [saved, setSaved] = useState(false);
+  const [exportingDocx, setExportingDocx] = useState(false);
+  const [exportError, setExportError] = useState('');
 
   function saveSource() {
     localStorage.setItem('smarthire_latex_resume', JSON.stringify({ template, latex: latexResume.latex, savedAt: new Date().toISOString() }));
     setSaved(true); setTimeout(() => setSaved(false), 2500);
   }
 
-  function downloadSource() {
-    const url = URL.createObjectURL(new Blob([latexResume.latex], { type: 'application/x-tex;charset=utf-8' }));
-    const link = document.createElement('a'); link.href = url; link.download = 'resume.tex'; link.click(); URL.revokeObjectURL(url);
+  function savePdf() {
+    try {
+      printResumePdf(latexResume.latex);
+      setExportError('');
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : 'Could not prepare the PDF.');
+    }
+  }
+
+  async function downloadDocx() {
+    setExportingDocx(true);
+    setExportError('');
+    try {
+      const blob = await createResumeDocx(latexResume.latex);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'resume.docx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      setExportError(error instanceof Error ? error.message : 'Could not create the DOCX file.');
+    } finally {
+      setExportingDocx(false);
+    }
   }
 
   return <section className="latex-result">
     <div className="latex-editor-toolbar"><div><span className="latex-live-dot" /> OVERLEAF STYLE EDITOR <span className="latex-template-tag">{template}</span></div><div className="latex-editor-actions">
       <button type="button" className="secondary-button compact-button" onClick={()=>navigator.clipboard.writeText(latexResume.latex)}>Copy code</button>
-      <button type="button" className="secondary-button compact-button" onClick={downloadSource}>Download .tex</button>
+      <button type="button" className="secondary-button compact-button" onClick={savePdf}>Save as PDF</button>
+      <button type="button" className="secondary-button compact-button" onClick={downloadDocx} disabled={exportingDocx}>{exportingDocx ? 'Creating DOCX…' : 'Download DOCX'}</button>
       <button type="button" className="primary-button compact-button" onClick={saveSource}>{saved ? 'Saved' : 'Save edits'}</button>
       <a className="secondary-button compact-button latex-overleaf-link" href="https://www.overleaf.com/project" target="_blank" rel="noreferrer">Open Overleaf</a>
     </div></div>
+    {exportError && <p className="latex-export-error" role="alert">{exportError}</p>}
     <div className="latex-workspace">
       <div className="latex-code-pane"><div className="latex-pane-title"><span>resume.tex</span><span>Editing source</span></div><textarea aria-label="Editable LaTeX source" value={latexResume.latex} onChange={e=>setLatexResume({...latexResume,latex:e.target.value})} spellCheck="false" /></div>
-      <div className="latex-preview-pane"><div className="latex-pane-title"><span>PDF Preview</span><span>Private preview</span></div><div className="latex-preview-message">Your resume source stays in this app. Download the .tex file and open it in Overleaf to compile and preview the PDF.</div></div>
+      <div className="latex-preview-pane"><div className="latex-pane-title"><span>PDF &amp; Word export</span><span>Processed in your browser</span></div><div className="latex-preview-message">Save as PDF opens your browser’s print dialog; choose “Save as PDF”. Download DOCX creates an editable Word document. Your resume content is processed locally.</div></div>
     </div>
     {latexResume.improvements && <JsonResult data={{ improvements: latexResume.improvements }} />}
   </section>;
