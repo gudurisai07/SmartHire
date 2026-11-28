@@ -117,12 +117,12 @@ public class ApplicationController {
             JsonNode assessment=ai.screenApplicantWithJob(limit(resumeText,14_000),limit(jobContext,8_000));
             if (assessment==null || !assessment.isObject()) {
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                        "The local AI returned an invalid applicant assessment. Please try screening again.");
+                        "The AI provider returned an invalid applicant assessment. Please try screening again.");
             }
             JsonNode score=assessment.path("overallMatchPercentage");
             if (!score.isIntegralNumber() || score.asInt()<0 || score.asInt()>100) {
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                        "The local AI returned an invalid applicant match score. Please try screening again.");
+                        "The AI provider returned an invalid applicant match score. Please try screening again.");
             }
             String matchingSkills=skillEvidence(assessment.path("matchingSkills"),
                     job.getRequiredSkills(),resumeText,true);

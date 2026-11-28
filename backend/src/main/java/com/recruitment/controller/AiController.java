@@ -105,11 +105,11 @@ public class AiController {
         JsonNode generated=result.path("questions");
         if(!generated.isArray()||generated.size()!=count)
             throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_GATEWAY,
-                    "The local AI returned "+(generated.isArray()?generated.size():0)+" of "+count+" interview questions. Please try again.");
+                    "The AI provider returned "+(generated.isArray()?generated.size():0)+" of "+count+" interview questions. Please try again.");
         for(JsonNode item:generated){
             if(item.path("question").asText("").isBlank())
                 throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_GATEWAY,
-                        "The local AI returned an incomplete interview question. Please try again.");
+                        "The AI provider returned an incomplete interview question. Please try again.");
         }
         for(JsonNode item:generated){
             InterviewQuestion question=new InterviewQuestion();question.setCandidate(c);question.setJob(j);
